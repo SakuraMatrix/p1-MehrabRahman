@@ -1,5 +1,6 @@
 package com.github.MehrabRahman.pokemart;
 
+import com.datastax.oss.driver.api.core.CqlSession;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.MehrabRahman.pokemart.domain.Item;
 import com.github.MehrabRahman.pokemart.repository.ItemRepository;
@@ -22,9 +23,11 @@ import java.nio.file.Paths;
 
 public class App {
     public static void main(String[] args) throws URISyntaxException {
+        Path indexHTML = Paths.get(App.class.getResource("/index.html").toURI());
         Path errorHTML = Paths.get(App.class.getResource("/error.html").toURI());
 
-        ItemRepository itemRepository = new ItemRepository();
+        CqlSession session = CqlSession.builder().build();
+        ItemRepository itemRepository = new ItemRepository(session);
         ItemService itemService = new ItemService(itemRepository);
 
         HttpServer.create()
@@ -34,8 +37,10 @@ public class App {
                         response.send(itemService.getAll().map(App::toByteBuf)
                                 .log("http-server")))
                     .get("/items/{param}", (request, response) ->
-                        response.sendString(Mono.just(request.param("param"))
+                        response.send(itemService.get(request.param("param")).map(App::toByteBuf)
                                 .log("http-server")))
+                    .get("/", (request, response) ->
+                            response.sendFile(indexHTML))
                     .get("/error", (request, response) ->
                         response.status(404).addHeader("Message", "Goofed")
                                 .sendFile(errorHTML))

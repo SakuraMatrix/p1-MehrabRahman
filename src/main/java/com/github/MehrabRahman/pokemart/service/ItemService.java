@@ -3,6 +3,7 @@ package com.github.MehrabRahman.pokemart.service;
 import com.github.MehrabRahman.pokemart.domain.Item;
 import com.github.MehrabRahman.pokemart.repository.ItemRepository;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -14,6 +15,10 @@ public class ItemService {
     }
 
     public Flux<Item> getAll() {
-        return Flux.fromIterable(itemRepository.getAll());
+        return itemRepository.getAll();
+    }
+
+    public Mono<Item> get(String id) {
+        return itemRepository.get(Integer.parseInt(id));
     }
 }
