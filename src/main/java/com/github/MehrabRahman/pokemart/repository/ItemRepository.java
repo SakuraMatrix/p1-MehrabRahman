@@ -29,7 +29,7 @@ public class ItemRepository {
         SimpleStatement stmt = SimpleStatement.builder("INSERT INTO pokemart.items (item_id, name, price) values (?, ?, ?)")
                         .addPositionalValues(item.getId(), item.getName(), item.getPrice())
                                 .build();
-        Flux.from(session.executeReactive(stmt)).blockLast();
+        Flux.from(session.executeReactive(stmt)).subscribe();
         return item;
     }
 }
