@@ -2,7 +2,7 @@ CREATE KEYSPACE IF NOT EXISTS pokemart WITH replication = {'class': 'SimpleStrat
 
 USE pokemart;
 
-CREATE TABLE IF NOT EXISTS item (
+CREATE TABLE IF NOT EXISTS items (
     item_id int,
     name text,
     price double,

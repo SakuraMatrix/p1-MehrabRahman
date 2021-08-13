@@ -1,56 +1,27 @@
 package com.github.MehrabRahman.pokemart;
 
-import com.datastax.oss.driver.api.core.CqlSession;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.MehrabRahman.pokemart.domain.Item;
-import com.github.MehrabRahman.pokemart.repository.ItemRepository;
-import com.github.MehrabRahman.pokemart.service.ItemService;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
-import reactor.core.publisher.Mono;
-import reactor.netty.http.server.HttpServer;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import reactor.netty.DisposableServer;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class App {
-    public static void main(String[] args) throws URISyntaxException {
-        Path indexHTML = Paths.get(App.class.getResource("/index.html").toURI());
-        Path errorHTML = Paths.get(App.class.getResource("/error.html").toURI());
-
-        CqlSession session = CqlSession.builder().build();
-        ItemRepository itemRepository = new ItemRepository(session);
-        ItemService itemService = new ItemService(itemRepository);
-
-        HttpServer.create()
-            .port(8080)
-            .route(routes ->
-                routes.get("/items", (request, response) ->
-                        response.send(itemService.getAll().map(App::toByteBuf)
-                                .log("http-server")))
-                    .get("/items/{param}", (request, response) ->
-                        response.send(itemService.get(request.param("param")).map(App::toByteBuf)
-                                .log("http-server")))
-                    .get("/", (request, response) ->
-                            response.sendFile(indexHTML))
-                    .get("/error", (request, response) ->
-                        response.status(404).addHeader("Message", "Goofed")
-                                .sendFile(errorHTML))
-                    )
-            .bindNow()
-            .onDispose()
-            .block();
-    }
-
     static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    public static void main(String[] args) throws URISyntaxException {
+        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfig.class);
+
+        applicationContext.getBean(DisposableServer.class)
+                .onDispose()
+                .block();
+    }
 
     static ByteBuf toByteBuf(Object o) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -60,5 +31,19 @@ public class App {
             ex.printStackTrace();
         }
         return ByteBufAllocator.DEFAULT.buffer().writeBytes(out.toByteArray());
+    }
+
+    static Item parseItem(String str) {
+        Item item = null;
+        try {
+            item = OBJECT_MAPPER.readValue(str, Item.class);
+        } catch (JsonProcessingException ex) {
+            String[] params = str.split("&");
+            int id = Integer.parseInt(params[0].split("=")[1]);
+            String name = params[1].split("=")[1];
+            double price = Double.parseDouble(params[2].split("=")[1]);
+            item = new Item(id, name, price);
+        }
+        return item;
     }
 }
