@@ -8,7 +8,7 @@ import reactor.core.publisher.Mono;
 
 @Service
 public class ItemService {
-    private ItemRepository itemRepository;
+    private final ItemRepository itemRepository;
 
     public ItemService(ItemRepository itemRepository) {
         this.itemRepository = itemRepository;
@@ -20,6 +20,10 @@ public class ItemService {
 
     public Mono<Item> get(String id) {
         return itemRepository.get(Integer.parseInt(id));
+    }
+
+    public Mono<Item> get(int id) {
+        return itemRepository.get(id);
     }
 
     public Item create(Item item) {

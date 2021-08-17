@@ -9,7 +9,7 @@ import reactor.core.publisher.Mono;
 
 @Repository
 public class ItemRepository {
-    private CqlSession session;
+    private final CqlSession session;
 
     public ItemRepository(CqlSession session) {
         this.session = session;
