@@ -26,7 +26,7 @@ public class ItemController {
     }
 
     @PostMapping("")
-    public Item create(@RequestBody Item item) {
+    public Mono<Item> create(@RequestBody Item item) {
         return itemService.create(item);
     }
 }

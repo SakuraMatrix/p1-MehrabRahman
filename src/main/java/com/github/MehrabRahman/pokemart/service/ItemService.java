@@ -15,18 +15,14 @@ public class ItemService {
     }
 
     public Flux<Item> getAll() {
-        return itemRepository.getAll();
-    }
-
-    public Mono<Item> get(String id) {
-        return itemRepository.get(Integer.parseInt(id));
+        return itemRepository.findAll();
     }
 
     public Mono<Item> get(int id) {
-        return itemRepository.get(id);
+        return itemRepository.findById(id);
     }
 
-    public Item create(Item item) {
-        return itemRepository.create(item);
+    public Mono<Item> create(Item item) {
+        return itemRepository.save(item);
     }
 }

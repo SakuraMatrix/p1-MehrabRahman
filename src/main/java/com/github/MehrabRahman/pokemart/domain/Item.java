@@ -1,8 +1,15 @@
 package com.github.MehrabRahman.pokemart.domain;
 
+import org.springframework.data.cassandra.core.cql.PrimaryKeyType;
+import org.springframework.data.cassandra.core.mapping.PrimaryKey;
+import org.springframework.data.cassandra.core.mapping.PrimaryKeyColumn;
+import org.springframework.data.cassandra.core.mapping.Table;
+
 import java.util.Objects;
 
+@Table("items")
 public class Item {
+    @PrimaryKey
     private int id;
     private String name;
     private double price;
